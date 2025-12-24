@@ -1,15 +1,22 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict
 from typing import List, Tuple
 from classify import classify_log, classify
 import uvicorn
+import os
 
 app = FastAPI(
     title="Log Classification API",
     description="API for classifying log messages using regex, BERT, and LLM",
     version="1.0.0"
 )
+
+# Mount static files
+if os.path.exists("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Add CORS middleware
 app.add_middleware(
@@ -57,14 +64,17 @@ class BatchClassificationResponse(BaseModel):
 
 @app.get("/")
 async def root():
-    """Root endpoint with API information"""
+    """Root endpoint - serves the demo UI"""
+    if os.path.exists("static/index.html"):
+        return FileResponse("static/index.html")
     return {
         "message": "Log Classification API",
         "version": "1.0.0",
         "endpoints": {
             "/classify": "POST - Classify a single log message",
             "/classify/batch": "POST - Classify multiple log messages",
-            "/health": "GET - Health check endpoint"
+            "/health": "GET - Health check endpoint",
+            "/docs": "GET - API documentation"
         }
     }
 
@@ -113,4 +123,4 @@ async def classify_batch_logs(batch: LogBatch):
         raise HTTPException(status_code=500, detail=f"Batch classification error: {str(e)}")
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)

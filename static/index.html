@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Classification System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 600;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .classification-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            box-shadow: 0 4px 10px rgba(17, 153, 142, 0.3);
+        }
+
+        .examples {
+            margin-top: 20px;
+        }
+
+        .example-item {
+            background: #f5f7fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .example-item:hover {
+            background: #e8eef5;
+        }
+
+        .example-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .example-text {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .info-section {
+            grid-column: 1 / -1;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+
+        .spinner.show {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .github-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .github-link a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 12px 30px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 25px;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        .github-link a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Log Classification System</h1>
+            <p>AI-Powered Multi-Tier Log Classification using Regex, BERT & LLM</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>Classify Your Logs</h2>
+                <form id="classifyForm">
+                    <div class="form-group">
+                        <label for="source">Log Source:</label>
+                        <select id="source" required>
+                            <option value="System">System</option>
+                            <option value="LegacyCRM">LegacyCRM</option>
+                            <option value="Application">Application</option>
+                            <option value="Security">Security</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="logMessage">Log Message:</label>
+                        <textarea id="logMessage" required placeholder="Enter your log message here..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn" id="submitBtn">Classify Log</button>
+                </form>
+
+                <div class="spinner" id="spinner"></div>
+                <div class="error" id="error"></div>
+
+                <div class="result-card" id="resultCard">
+                    <div class="result-label">Source:</div>
+                    <div class="result-value" id="resultSource"></div>
+
+                    <div class="result-label">Log Message:</div>
+                    <div class="result-value" id="resultMessage"></div>
+
+                    <div class="result-label">Classification:</div>
+                    <div class="classification-badge" id="resultClassification"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Example Logs</h2>
+                <p style="color: #666; margin-bottom: 15px;">Click to try these examples:</p>
+                
+                <div class="examples">
+                    <div class="example-item" onclick="loadExample('System', 'User user123 logged in.')">
+                        <div class="example-label">🔐 Authentication</div>
+                        <div class="example-text">User user123 logged in.</div>
+                    </div>
+
+                    <div class="example-item" onclick="loadExample('System', 'Backup started at 2024-06-01 02:00 AM')">
+                        <div class="example-label">💾 Backup</div>
+                        <div class="example-text">Backup started at 2024-06-01 02:00 AM</div>
+                    </div>
+
+                    <div class="example-item" onclick="loadExample('System', 'System updated to version 2.1.0')">
+                        <div class="example-label">🔄 Update</div>
+                        <div class="example-text">System updated to version 2.1.0</div>
+                    </div>
+
+                    <div class="example-item" onclick="loadExample('System', 'File report.pdf uploaded successfully.')">
+                        <div class="example-label">📁 File Operation</div>
+                        <div class="example-text">File report.pdf uploaded successfully.</div>
+                    </div>
+
+                    <div class="example-item" onclick="loadExample('System', 'System reboot initiated by user admin')">
+                        <div class="example-label">👤 User Action</div>
+                        <div class="example-text">System reboot initiated by user admin</div>
+                    </div>
+
+                    <div class="example-item" onclick="loadExample('LegacyCRM', 'The ReportGenerator module will be retired in version 2.0.')">
+                        <div class="example-label">🤖 LLM Classification</div>
+                        <div class="example-text">The 'ReportGenerator' module will be retired...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card info-section">
+                <h2>How It Works</h2>
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Regex Pattern</h3>
+                        <p>Fast pattern matching for common log formats</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🧠</div>
+                        <h3>BERT Embeddings</h3>
+                        <p>ML classifier with sentence transformers</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🤖</div>
+                        <h3>LLM Fallback</h3>
+                        <p>Groq API for complex/legacy logs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="github-link">
+            <a href="https://github.com/utkarshhzz/Log_Classification" target="_blank">
+                ⭐ View on GitHub
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        function loadExample(source, message) {
+            document.getElementById('source').value = source;
+            document.getElementById('logMessage').value = message;
+        }
+
+        document.getElementById('classifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const source = document.getElementById('source').value;
+            const logMessage = document.getElementById('logMessage').value;
+
+            const submitBtn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('spinner');
+            const resultCard = document.getElementById('resultCard');
+            const errorDiv = document.getElementById('error');
+
+            // Reset UI
+            resultCard.classList.remove('show');
+            errorDiv.classList.remove('show');
+            submitBtn.disabled = true;
+            spinner.classList.add('show');
+
+            try {
+                const response = await fetch(`${API_BASE}/classify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        source: source,
+                        log_message: logMessage
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Display results
+                document.getElementById('resultSource').textContent = data.source;
+                document.getElementById('resultMessage').textContent = data.log_message;
+                document.getElementById('resultClassification').textContent = data.classification;
+
+                resultCard.classList.add('show');
+            } catch (error) {
+                console.error('Error:', error);
+                errorDiv.textContent = `Error: ${error.message}. Make sure the API server is running on ${API_BASE}`;
+                errorDiv.classList.add('show');
+            } finally {
+                submitBtn.disabled = false;
+                spinner.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

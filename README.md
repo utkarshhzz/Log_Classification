@@ -63,7 +63,7 @@ Log_Classification/
 └── .env                       # Environment variables
 ```
 
-## 🎯 Usage
+## 🚀 Usage
 
 ### Running the FastAPI Server
 
@@ -72,6 +72,8 @@ python main.py
 ```
 
 The API will be available at `http://localhost:8000`
+
+**🎨 Demo UI**: Open your browser and go to `http://localhost:8000` to access the interactive demo interface!
 
 ### API Documentation
 
