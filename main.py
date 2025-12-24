@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Tuple
 from classify import classify_log, classify
 import uvicorn
@@ -21,22 +21,21 @@ app.add_middleware(
 )
 
 class LogMessage(BaseModel):
-    source: str
-    log_message: str
-    
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "source": "System",
                 "log_message": "User user123 logged in."
             }
         }
+    )
+    
+    source: str
+    log_message: str
 
 class LogBatch(BaseModel):
-    logs: List[Tuple[str, str]]
-    
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "logs": [
                     ["System", "User user123 logged in."],
@@ -44,6 +43,9 @@ class LogBatch(BaseModel):
                 ]
             }
         }
+    )
+    
+    logs: List[Tuple[str, str]]
 
 class ClassificationResponse(BaseModel):
     source: str
